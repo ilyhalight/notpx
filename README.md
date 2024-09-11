@@ -75,6 +75,8 @@ auth: [
 
 7. Set array of `http(s)` proxies if needed (I haven't tested it, it takes a random proxy from the array when requesting it)
 
+* auth data lifetime - 24 hours
+
 ### How to convert image to coords?
 
 > [!CAUTION]
