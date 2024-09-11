@@ -84,12 +84,12 @@ auth: [
 
 It is best if you draw the image in Figma and export it to `.png` there.
 
-1. Copy your image to the parent folder and name it `result.png` (sometimes it may look crooked, but the final result will be normal)
+1. Copy your image to the parent folder and name it `result.png`
 2. Run script:
 ```bash
 bun ocr
 ```
-3. Go to the `result.txt` file and check if the image looks right
+3. Go to the `result.txt` file and check if the image looks right (sometimes it may look crooked, but the final result will be normal)
 4. Set the coordinates to start drawing on the canvas in `result.json`:
 
 ![how to set coords](images/coords-for-result.png)
