@@ -1,0 +1,19 @@
+{
+  "name": "notpx",
+  "module": "src/index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "map": "bun run src/map.ts",
+    "ocr": "bun run src/ocr.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "pngjs": "^7.0.0"
+  }
+}
