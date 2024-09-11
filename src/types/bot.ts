@@ -7,4 +7,5 @@ export type Account = {
   balance: number;
   tokens: number;
   auth: string;
+  lastErrorAt: number;
 };

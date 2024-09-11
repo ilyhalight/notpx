@@ -17,6 +17,10 @@ class NotPixelBot {
 
   accountsData: Account[] = [];
   totalPlaced = 0;
+  lastClaimedAt = 0;
+  claimDelay = config.claimDelay * 1000;
+  intervalDelay = config.delay * 1000;
+  timer: ReturnType<typeof setTimeout> | undefined = undefined;
 
   constructor(image: OCRData) {
     this.initialPos = image.initialPos;
@@ -25,6 +29,7 @@ class NotPixelBot {
     this.pixels = image.pixels;
     this.initialPixels = this.placedPixels = [];
     this.calcPixels();
+    this.getInitAccountsData();
   }
 
   calcPixels() {
@@ -45,20 +50,36 @@ class NotPixelBot {
     };
   }
 
+  getInitAccountsData() {
+    this.accountsData = config.auth.map((auth, idx) => {
+      console.log(`Account #${idx}. Getting init data...`);
+      return {
+        id: idx + 1,
+        balance: 0,
+        tokens: 0,
+        auth,
+        lastErrorAt: 0,
+      };
+    });
+
+    return this;
+  }
+
   async getAccountsData() {
     console.log("Get accounts data...");
     this.accountsData = await Promise.all(
-      config.auth.map(async (auth, idx) => {
-        console.log(`Account #${idx}. Getting account mining status...`);
+      this.accountsData.map(async (account) => {
+        console.log(`Account #${account.id}. Getting account mining status...`);
         const miningStatus = await new UsersRequest(
-          this.getRequestData(auth)
+          this.getRequestData(account.auth)
         ).getMiningStatus();
+        const balance = miningStatus?.charges ?? 0;
         return {
-          id: idx + 1,
+          ...account,
           balance: miningStatus?.charges ?? 0,
           tokens: miningStatus?.userBalance ?? 0,
-          auth,
-        } as Account;
+          lastErrorAt: balance ? 0 : account.lastErrorAt,
+        };
       })
     );
     console.log("finish get accounts data");
@@ -83,7 +104,8 @@ class NotPixelBot {
     if (!result) {
       console.error("Balance is emptied! Stop working...");
       account.balance = 0;
-      return;
+      account.lastErrorAt = Date.now();
+      return this;
     }
 
     console.info(`Account #${account.id}. Set pixel to ${x} ${y}`);
@@ -93,6 +115,11 @@ class NotPixelBot {
   }
 
   async claimAll() {
+    const timestamp = Date.now();
+    if (timestamp < this.lastClaimedAt + this.claimDelay) {
+      return this;
+    }
+
     console.log("claim all minings...");
     this.accountsData = await Promise.all(
       this.accountsData.map(async (account) => {
@@ -111,12 +138,15 @@ class NotPixelBot {
       })
     );
 
+    this.lastClaimedAt = Date.now();
     console.log("finish claim");
     return this;
   }
 
   findAvailableAccount() {
-    return this.accountsData.find((account) => account.balance > 0);
+    return this.accountsData.find(
+      (account) => account.balance > 0 && !account.lastErrorAt
+    );
   }
 
   async setPixels() {
@@ -160,7 +190,7 @@ class NotPixelBot {
     await this.run();
     setInterval(async () => {
       await this.run();
-    }, config.delay * 1000);
+    }, this.intervalDelay);
   }
 }
 

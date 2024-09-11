@@ -7,5 +7,6 @@ export default {
     "user=",
   ],
   proxy: [],
-  delay: 90, // seconds
+  delay: 5, // seconds
+  claimDelay: 90, // seconds
 };
