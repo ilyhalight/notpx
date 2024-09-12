@@ -1,4 +1,5 @@
 import path from "node:path";
+import { styleText } from "node:util";
 import { sleep } from "bun";
 
 import { PixelRequest } from "./requests/pixels";
@@ -108,7 +109,9 @@ class NotPixelBot {
       return this;
     }
 
-    console.info(`Account #${account.id}. Set pixel to ${x} ${y}`);
+    console.info(
+      `Account #${account.id}. ${styleText("yellow", `Set pixel to ${x} ${y}`)}`
+    );
     this.totalPlaced += 1;
     this.placedPixels.push(pixel);
     return this;
