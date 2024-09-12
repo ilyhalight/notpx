@@ -135,6 +135,11 @@ const chars = {
     color: Color.Black,
     symbol: ".",
   },
+  // transparent
+  "0,0,0,0": {
+    color: null,
+    symbol: " ",
+  },
 };
 
 const colorWidth = 4;
@@ -169,12 +174,15 @@ async function main() {
     }, [] as ColorCanvas)
     .map((line, lineIdx) =>
       line.map((color, colorIdx) => {
-        !Object(chars).hasOwnProperty(color.toString()) && console.log(color);
+        const colorString = color.toString();
+        if (!Object(chars).hasOwnProperty(colorString)) {
+          console.log(colorString);
+        }
+
         return {
           x: colorIdx,
           y: lineIdx,
-          ...(chars[color.toString() as keyof typeof chars] ??
-            chars["0,0,0,255"]),
+          ...(chars[colorString as keyof typeof chars] ?? chars["0,0,0,255"]),
         } as OCRPixel;
       })
     );
@@ -184,7 +192,9 @@ async function main() {
     width: png.width,
     height: png.height,
     totalPixels: png.data.length,
-    pixels: pixels.flat(Infinity),
+    pixels: (pixels.flat(Infinity) as OCRPixel[]).filter(
+      (pixel) => pixel.color
+    ),
   } as OCRData;
 
   Bun.write(

@@ -80,7 +80,7 @@ auth: [
 ### How to convert image to coords?
 
 > [!CAUTION]
-> The image should be as clear as possible and have only the colors specified in the `src/types/pixels.ts` file.
+> The image should be as clear as possible and have only the colors specified in the `src/types/pixels.ts` file (transparent supported).
 > The resolution of the image must match the resolution of what you are drawing. If you want to draw 32x32, then the picture should also be 32x32, etc.
 > Only `.png` is supported!
 
