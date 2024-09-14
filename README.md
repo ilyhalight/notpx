@@ -9,9 +9,10 @@
 
 1. Setting pixels at specified coordinates (coords in `result.json`)
 2. Auto collection of tokens
-3. Saving screenshots of the map (if necessary, additionally run the `bun run map` file)
-4. Automatic image conversion to coordinates (Not all images are supported, read more below!!!)
-5. Functions have been made for the entire NotPixel API, if something is missing in the bot, you can easily add it without even getting into the game itself
+3. Auto upgrade boosts
+4. Saving screenshots of the map (if necessary, additionally run the `bun run map` file)
+5. Automatic image conversion to coordinates (Not all images are supported, read more below!!!)
+6. Functions have been made for the entire NotPixel API, if something is missing in the bot, you can easily add it without even getting into the game itself
 
 * The bot works linearly, i.e. it goes along the line until it finishes the cycle
 
@@ -51,7 +52,21 @@ E.g.: `111, 414` - 111 it's X, 414 it's Y.
 
 ### How to get auth data?
 
+* auth data lifetime - 24 hours
+
+#### Web Telegram
+
+1. Login to Telegram Web
+2. Open NotPixel bot
+3. Click to start
+4. Open devtools -> network
+5. Find any request with Host is notpx.app and click on it LMB
+6. Check Headers and find Authorization. Copy all after `initData` (without 1st space)
+
+#### Telegram Desktop
+
 1. Install [Fiddler Classic](https://www.telerik.com/fiddler/fiddler-classic)
+
 2. Run and check if any requests appear on any site (allow the installation of the certificate if requested)
 
 ![Fiddler example requests](images/fiddler_requests.png)
@@ -74,8 +89,6 @@ auth: [
 ```
 
 7. Set array of `http(s)` proxies if needed (I haven't tested it, it takes a random proxy from the array when requesting it)
-
-* auth data lifetime - 24 hours
 
 ### How to convert image to coords?
 
@@ -102,7 +115,7 @@ In this example, change 141 to X coordinate, 309 to Y coordinate of canvas
 
 ## About chances of being banned
 
-I have been checking the bot on several accounts for more than 10 hours.
+I have been checking the bot on several accounts for more than 48+ hours.
 
 During this time, no restrictions were received.
 
