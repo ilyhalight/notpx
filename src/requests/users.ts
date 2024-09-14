@@ -1,5 +1,12 @@
 import BaseRequest from "./base";
-import type { CurrentUser, MiningStatus } from "../types/users";
+import type {
+  Boost,
+  BoostResponse,
+  CurrentUser,
+  MiningStatus,
+  Task,
+  TaskResponse,
+} from "../types/users";
 
 export class UsersRequest extends BaseRequest {
   async me() {
@@ -56,6 +63,56 @@ export class UsersRequest extends BaseRequest {
       return data as MiningStatus;
     } catch (err: unknown) {
       console.error("Failed to claim mining, reason:", (err as Error)?.message);
+      return undefined;
+    }
+  }
+
+  async checkTask(task: Task) {
+    try {
+      const res = await this.request(`/api/v1/mining/task/check/${task}`);
+      if (res.status === 500) {
+        // can't claim task. Try again in xxx seconds
+        const data = await res.text();
+        throw new Error(data);
+      }
+
+      const data = await res.json();
+      if (data.hasOwnProperty("error")) {
+        throw new Error(data.error);
+      }
+
+      return data as TaskResponse;
+    } catch (err: unknown) {
+      console.error(
+        `Failed to check mining task ${task}, reason: ${
+          (err as Error)?.message
+        }`
+      );
+      return undefined;
+    }
+  }
+
+  async checkBoost(boost: Boost) {
+    try {
+      const res = await this.request(`/api/v1/mining/boost/check/${boost}`);
+      if (res.status === 500) {
+        // can't claim boost. Try again in xxx seconds
+        const data = await res.text();
+        throw new Error(data);
+      }
+
+      const data = await res.json();
+      if (data.hasOwnProperty("error")) {
+        throw new Error(data.error);
+      }
+
+      return data as BoostResponse;
+    } catch (err: unknown) {
+      console.error(
+        `Failed to check mining boost ${boost}, reason: ${
+          (err as Error)?.message
+        }`
+      );
       return undefined;
     }
   }
