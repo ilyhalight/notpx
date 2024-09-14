@@ -35,9 +35,29 @@ export type PixelOwner = {
 };
 
 export interface CurrentUser extends PixelOwner {
+  // id not null for you
   language: "en";
   isPremium: true;
 }
+
+export type Boost = "energyLimit" | "paintReward" | "reChargeSpeed";
+export type Task =
+  | "invite1fren"
+  | "invite3fren"
+  // | "invite10fren" // hidden
+  | "spendStars"
+  // | "walletVerification" // hidden
+  // | "pixelInNickname" // hidden
+  | "paint20pixels"
+  | "joinSquad"
+  | "leagueBonusSilver"
+  | "leagueBonusGold"
+  | "premium"
+  | "channel"
+  | "x";
+
+export type Tasks = Record<Task, boolean>;
+export type Boosts = Record<Boost, number>;
 
 export type MiningStatus = {
   coins: number;
@@ -46,8 +66,7 @@ export type MiningStatus = {
   fromUpdate: number;
   maxMiningTime: number;
   claimed: number;
-  boosts: unknown;
-  totalUserPixels: number;
+  repaintsTotal: number;
   userBalance: number;
   activated: boolean;
   league: League;
@@ -56,4 +75,9 @@ export type MiningStatus = {
   reChargeTimer: number;
   reChargeSpeed: number;
   goods: Record<string, number> | null; // idk
+  tasks: Tasks;
+  boosts: Boosts;
 };
+
+export type BoostResponse = Record<Boost, boolean>;
+export type TaskResponse = Record<Task, boolean>;
