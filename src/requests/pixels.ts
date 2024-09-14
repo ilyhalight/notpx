@@ -7,7 +7,10 @@ import type {
 
 export class PixelRequest extends BaseRequest {
   calcPixelId(x: number, y: number) {
-    return +`${y}${x + 1}`;
+    x = x + 1;
+    const xPos = String(x).padStart(3, "0");
+    const yPos = String(y).padStart(3, "0");
+    return +`${yPos}${xPos}`;
   }
 
   async getPixel(x: number, y: number) {
@@ -15,7 +18,6 @@ export class PixelRequest extends BaseRequest {
     try {
       const res = await this.request(`/api/v1/image/get/${pixelId}`);
       const data = await res.json();
-      // console.log(data);
       if (data.hasOwnProperty("error")) {
         throw new Error(data.error);
       }
@@ -38,7 +40,6 @@ export class PixelRequest extends BaseRequest {
         }),
       });
       const data = await res.json();
-      // console.log(data);
       if (data.hasOwnProperty("error")) {
         throw new Error(data.error);
       }

@@ -14,7 +14,7 @@ export default class {
     this.proxy = config.proxy[Math.floor(Math.random() * config.proxy.length)];
   }
 
-  getHeaders() {
+  getHeaders(): Record<string, string> {
     return {
       "User-Agent": this.userAgent,
       Accept: "application/json, text/plain, */*",
