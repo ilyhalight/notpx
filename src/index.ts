@@ -151,7 +151,6 @@ class NotPixelBot {
     const result = await new PixelRequest(
       this.getRequestData(account.auth)
     ).setPixel(x, y, color);
-    console.log(result);
     if (!result) {
       console.error("Balance is emptied! Stop working...");
       account.balance = 0;
