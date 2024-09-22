@@ -47,6 +47,7 @@ class NotPixelBot {
     this.pixels = image.pixels;
     this.initialPixels = this.placedPixels = [];
     this.autoUpgrade = config.autoUpgrade;
+    this.useFastRecharge = config.useFastRecharge;
     this.checkPixelInfo = config.checkPixelInfo;
     this.setPixelsToMap = config.setPixelsToMap;
     this.calcPixels();
