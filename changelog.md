@@ -1,3 +1,8 @@
+# 1.2.1
+
+- Added support of use Fast repaints by Goods
+- Updated API types
+
 # 1.2.0
 
 - Increased the standard claim delay

@@ -3,6 +3,7 @@ import type {
   Boost,
   BoostResponse,
   CurrentUser,
+  GoodItem,
   MiningStatus,
   Task,
   TaskResponse,
@@ -110,6 +111,29 @@ export class UsersRequest extends BaseRequest {
     } catch (err: unknown) {
       console.error(
         `Failed to check mining boost ${boost}, reason: ${
+          (err as Error)?.message
+        }`
+      );
+      return undefined;
+    }
+  }
+
+  async activateSpecial(special: GoodItem) {
+    try {
+      const res = await this.request(`/api/v1/repaint/special`, {
+        body: JSON.stringify({ pixelId: 1, type: Number(special) }),
+        method: "POST",
+      });
+
+      const data = await res.text();
+      if (res.status === 500) {
+        throw new Error(data);
+      }
+
+      return data;
+    } catch (err: unknown) {
+      console.error(
+        `Failed to activate special item ${special}, reason: ${
           (err as Error)?.message
         }`
       );

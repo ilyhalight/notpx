@@ -59,6 +59,13 @@ export type Task =
 export type Tasks = Record<Task, boolean>;
 export type Boosts = Record<Boost, number>;
 
+export enum GoodItem {
+  FAST_REPAINT = "1",
+  TNT = "2",
+}
+
+export type Goods = Record<GoodItem, number>;
+
 export type MiningStatus = {
   coins: number;
   speedPerSecond: number;
@@ -74,7 +81,7 @@ export type MiningStatus = {
   maxCharges: number;
   reChargeTimer: number;
   reChargeSpeed: number;
-  goods: Record<string, number> | null; // idk
+  goods: Goods | null;
   tasks: Tasks;
   boosts: Boosts;
 };

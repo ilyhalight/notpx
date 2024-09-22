@@ -1,4 +1,4 @@
-import type { Boosts } from "./users";
+import type { Boosts, Goods } from "./users";
 
 export type PixelInput = [x: number, y: number];
 
@@ -10,6 +10,7 @@ export type Account = {
   auth: string;
   lastErrorAt: number;
   boosts: Boosts;
+  goods: Goods;
 };
 
 export type RepaintLevel = {

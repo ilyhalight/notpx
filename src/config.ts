@@ -6,7 +6,8 @@ export default {
   auth: [],
   proxy: [],
   autoUpgrade: true,
-  checkPixelInfo: false,
+  useFastRecharge: true, // fast recharge by goods
+  checkPixelInfo: true,
   setPixelsToMap: true,
   delay: 5, // seconds
   claimDelay: 3600, // seconds

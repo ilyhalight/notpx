@@ -14,7 +14,7 @@ import type {
 } from "./types/bot";
 import { ConfigRequest } from "./requests/config";
 import type { Config } from "./types/config";
-import type { Boosts } from "./types/users";
+import { GoodItem, type Boosts, type Goods } from "./types/users";
 
 class NotPixelBot {
   initialPos: PixelInput;
@@ -33,6 +33,7 @@ class NotPixelBot {
   totalPlaced = 0;
   lastClaimedAt = 0;
   autoUpgrade = false;
+  useFastRecharge = false;
   checkPixelInfo = false;
   setPixelsToMap = true;
   claimDelay = config.claimDelay * 1000;
@@ -117,6 +118,7 @@ class NotPixelBot {
         auth,
         lastErrorAt: 0,
         boosts: {} as Boosts,
+        goods: {} as Goods,
       };
     });
 
@@ -134,10 +136,12 @@ class NotPixelBot {
         const balance = miningStatus?.charges ?? 0;
         return {
           ...account,
-          balance: balance,
+          balance,
           tokens: miningStatus?.userBalance ?? 0,
           lastErrorAt: balance ? 0 : account.lastErrorAt,
           boosts: miningStatus?.boosts ?? ({} as Boosts),
+          goods: miningStatus?.goods ?? ({} as Goods),
+          repaintsTotal: miningStatus?.repaintsTotal ?? 0,
         };
       })
     );
@@ -262,7 +266,6 @@ class NotPixelBot {
         }
 
         account.tokens += miningStatus.claimed;
-        account.repaintsTotal = miningStatus.repaintsTotal;
         console.log(
           `Account #${account.id}. New balance: ${account.tokens}. Total repaints: ${account.repaintsTotal}`
         );
@@ -277,6 +280,31 @@ class NotPixelBot {
     );
 
     this.lastClaimedAt = Date.now();
+    return this;
+  }
+
+  async activateSpecials() {
+    if (!this.useFastRecharge) {
+      return this;
+    }
+
+    console.log("Trying activate specials...");
+    this.accountsData = await Promise.all(
+      this.accountsData.map(async (account) => {
+        if (
+          account.balance ||
+          !Object.keys(account.goods).includes(String(GoodItem.FAST_REPAINT))
+        ) {
+          return account;
+        }
+
+        console.log(`Account #${account.id}. Activate fast repaints...`);
+        const userRequest = new UsersRequest(this.getRequestData(account.auth));
+        await userRequest.activateSpecial(GoodItem.FAST_REPAINT);
+        return account;
+      })
+    );
+
     return this;
   }
 
@@ -324,6 +352,7 @@ class NotPixelBot {
 
   async run() {
     await this.getAccountsData();
+    await this.activateSpecials();
     await this.claimAndUpgrade();
     await this.setPixels();
     return this;
