@@ -69,6 +69,7 @@ class NotPixelBot {
       userAgent: config.userAgent,
       domain: config.domain,
       auth,
+      origin: config.origin,
     };
   }
 

@@ -1,1 +1,6 @@
-export type BaseConfig = { userAgent: string; domain: string; auth: string };
+export type BaseConfig = {
+  userAgent: string;
+  domain: string;
+  auth: string;
+  origin: string;
+};

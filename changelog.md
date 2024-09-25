@@ -1,3 +1,7 @@
+# 1.2.2
+
+- Added new origin and referer
+
 # 1.2.1
 
 - Added support of use Fast repaints by Goods

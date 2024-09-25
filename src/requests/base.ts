@@ -6,11 +6,13 @@ export default class {
   domain: string;
   auth: string;
   proxy: string;
+  origin: string;
 
-  constructor({ userAgent, domain, auth }: BaseConfig) {
+  constructor({ userAgent, domain, auth, origin }: BaseConfig) {
     this.userAgent = userAgent;
     this.domain = domain;
     this.auth = auth;
+    this.origin = origin;
     this.proxy = config.proxy[Math.floor(Math.random() * config.proxy.length)];
   }
 
@@ -24,13 +26,14 @@ export default class {
       "Sec-Fetch-Dest": "empty",
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Site": "same-origin",
+      Referer: `${this.origin}/`,
+      Origin: this.origin,
     };
   }
 
   getRequestOpts() {
     return {
       headers: this.getHeaders(),
-      referrer: `https://${this.domain}/`,
       proxy: this.proxy,
     };
   }
