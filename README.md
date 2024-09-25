@@ -52,7 +52,7 @@ E.g.: `111, 414` - 111 it's X, 414 it's Y.
 
 ### How to get auth data?
 
-* auth data lifetime - 24 hours
+* auth data lifetime - ~30 min
 
 #### Web Telegram
 
