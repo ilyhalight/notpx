@@ -38,7 +38,7 @@ bun install
 bun start
 ```
 
-6. (Optional) Run screenshoter:
+7. (Optional) Run screenshoter:
 ```bash
 bun map
 ```
