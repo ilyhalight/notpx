@@ -4,18 +4,26 @@ export type GeneralSquad = {
   id: number;
   name: string;
   slug: string | null;
-  logo: string;
-  players: null;
-  totalBalance: null;
+  logo: string | null;
+  players: number | null;
+  scoredRepaints: number | null;
+  templateX: number | null;
+  templateY: number | null;
+  totalBalance: number | null;
+  totalRepaints: number | null;
 };
 
 export interface WithoutSquad {
-  id: number;
-  name: number;
-  slug: number;
-  logo: number;
+  id: null;
+  name: null;
+  slug: null;
+  logo: null;
   players: null;
+  scoredRepaints: null;
+  templateX: null;
+  templateY: null;
   totalBalance: null;
+  totalRepaints: null;
 }
 
 export type Squad = GeneralSquad | WithoutSquad;
@@ -37,7 +45,8 @@ export type PixelOwner = {
 export interface CurrentUser extends PixelOwner {
   // id not null for you
   language: "en";
-  isPremium: true;
+  isPremium: boolean;
+  isBetaTester: boolean;
 }
 
 export type Boost = "energyLimit" | "paintReward" | "reChargeSpeed";

@@ -1,13 +1,17 @@
+import type { SessionData } from "./sessions";
 import type { Boosts, Goods } from "./users";
 
 export type PixelInput = [x: number, y: number];
 
 export type Account = {
-  id: number;
+  id: number; // it isn't user id
+  userId: number;
+  sessionData: SessionData;
   balance: number;
   tokens: number;
   repaintsTotal: number;
-  auth: string;
+  auth: string | null;
+  lastRenewAt: number;
   lastErrorAt: number;
   boosts: Boosts;
   goods: Goods;
