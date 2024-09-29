@@ -59,6 +59,8 @@ You may have to manually launch the not pixel app for the 1st time
 
 * auth data lifetime - ~30 min
 
+#### Preparatory steps
+
 1. Login to [my.telegram.org](https://my.telegram.org)
 2. Go to "Api development tools"
 3. Create new Application by filling in the fields as shown in the picture
@@ -76,7 +78,7 @@ You may have to manually launch the not pixel app for the 1st time
 
 Supported Pyrogram and Telethon v1.x sessions
 
-1. Create `./sessions` folder (not in `./src/sessions`)
+1. Create `sessions` folder near the package.json file (not in `./src`)
 2. Place `.session` files in `./sessions` folder (not in `./src/sessions`)
 3. Run `bun sessions:parse`
 4. Done
