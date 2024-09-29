@@ -3,4 +3,5 @@ export type BaseConfig = {
   domain: string;
   auth: string;
   origin: string;
+  userId?: number;
 };

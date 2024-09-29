@@ -1,5 +1,5 @@
-import config from "../config";
 import type { BaseConfig } from "../types/base";
+import { getRandomProxy } from "../utils";
 
 export default class {
   userAgent: string;
@@ -7,13 +7,15 @@ export default class {
   auth: string;
   proxy: string;
   origin: string;
+  userId: number;
 
-  constructor({ userAgent, domain, auth, origin }: BaseConfig) {
+  constructor({ userAgent, domain, auth, origin, userId }: BaseConfig) {
     this.userAgent = userAgent;
     this.domain = domain;
     this.auth = auth;
     this.origin = origin;
-    this.proxy = config.proxy[Math.floor(Math.random() * config.proxy.length)];
+    this.userId = userId ?? 0;
+    this.proxy = getRandomProxy();
   }
 
   getHeaders(): Record<string, string> {
