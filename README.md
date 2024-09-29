@@ -10,10 +10,12 @@
 1. Setting pixels at specified coordinates (coords in `result.json`)
 2. Auto collection of tokens
 3. Auto upgrade boosts
-4. Saving screenshots of the map (if necessary, additionally run the `bun run map` file)
-5. Automatic image conversion to coordinates (Not all images are supported, read more below!!!)
-6. Functions have been made for the entire NotPixel API, if something is missing in the bot, you can easily add it without even getting into the game itself
+4. Auto use fast recharge boost if exists
+5. Saving screenshots of the map (if necessary, additionally run the `bun run map` file)
+6. Automatic image conversion to coordinates (Not all images are supported, read more below!!!)
+7. Functions have been made for the entire NotPixel API, if something is missing in the bot, you can easily add it without even getting into the game itself
 
+* All tasks are delayed. Every account has its own user agent
 * The bot works linearly, i.e. it goes along the line until it finishes the cycle
 
 **Have fun :)**
@@ -50,45 +52,52 @@ E.g.: `111, 414` - 111 it's X, 414 it's Y.
 
 ![Example of coords](images/coords.png)
 
-### How to get auth data?
+### Authorization
+
+You may have to manually launch the not pixel app for the 1st time
 
 * auth data lifetime - ~30 min
 
-#### Web Telegram
+1. Login to [my.telegram.org](https://my.telegram.org)
+2. Go to "Api development tools"
+3. Create new Application by filling in the fields as shown in the picture
 
-1. Login to Telegram Web
-2. Open NotPixel bot
-3. Click to start
-4. Open devtools -> network
-5. Find any request with Host is notpx.app and click on it LMB
-6. Check Headers and find Authorization. Copy all after `initData` (without 1st space)
+![Create new application](images/tg-create-application.png)
 
-#### Telegram Desktop
+4. Copy the `api_id` and `api_hash`
 
-1. Install [Fiddler Classic](https://www.telerik.com/fiddler/fiddler-classic)
+![Copy api configuration](images/tg-copy-config.png)
 
-2. Run and check if any requests appear on any site (allow the installation of the certificate if requested)
+5. Insert `api_id` and `api_hash` to `.example.env`
+6. Rename `.example.env` to `.env`
 
-![Fiddler example requests](images/fiddler_requests.png)
+#### Login with Sessions
 
-3. Run NotPixel in Telegram
-4. Find any request with Host is `notpx.app` and click on it LMB
+Supported Pyrogram and Telethon v1.x sessions
 
-![Request with notpx.app host](images/fiddler-notpx-host.png)
+1. Create `./sessions` folder (not in `./src/sessions`)
+2. Place `.session` files in `./sessions` folder (not in `./src/sessions`)
+3. Run `bun sessions:parse`
+4. Done
 
-5. Go Headers and find Authorization. Copy all after `initData` (without 1st space)
+#### Login with Phone number
 
-![Get notpx.app auth header](images/fiddler-notpx-auth.png)
+1. Run `bun sessions:add`
+2. Enter the required data in the console
+3. Done
 
-6. Insert copied text to auth field in `src/config.ts`
+### Proxy
+
+The bot supports only http and https proxies. I haven't tested it
+
+1. Open `src/config.ts`
+2. Add proxy string to `proxy` array
+
+```ts
+...
+proxy: ["https://...:443", "http://...:8053"],
+...
 ```
-auth: [
-    "user=...",
-    "user=...",
-  ],
-```
-
-7. Set array of `http(s)` proxies if needed (I haven't tested it, it takes a random proxy from the array when requesting it)
 
 ### How to convert image to coords?
 
@@ -115,14 +124,4 @@ In this example, change 141 to X coordinate, 309 to Y coordinate of canvas
 
 ## About chances of being banned
 
-I have been checking the bot on several accounts for more than 48+ hours.
-
-During this time, no restrictions were received.
-
-All mining points have been counted, and the drawing is still intact as I returned to the computer.
-
-It took about 4-5 hours to draw such a 16x16 (784 pixels) drawing with the participation of several accounts:
-
-![image result](images/image-result.png)
-
-Keep in mind that everything you do, you do, only at your own risk. Have fun
+Everything is at your own risk. I don't recommend using it on the main accounts.

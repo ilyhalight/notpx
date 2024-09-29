@@ -1,3 +1,14 @@
+# 1.3.0
+
+- Added auto renew initData every N mins
+- Added auto activating accounts after Beta test
+- Added randomize all delays
+- Added referalId
+- Improved console logging
+- Updated origin
+- Updated typings
+- Migrated from webapp auth to telegram sessions (read [README.md](README.md))
+
 # 1.2.2
 
 - Added new origin and referer

@@ -3,19 +3,26 @@
   "module": "src/index.ts",
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/js-yaml": "^4.0.9"
+    "@types/js-yaml": "^4.0.9",
+    "@types/user-agents": "^1.0.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "scripts": {
     "start": "bun run src/index.ts",
-    "map": "bun run src/map.ts",
-    "ocr": "bun run src/ocr.ts"
+    "map": "bun run src/scripts/map.ts",
+    "ocr": "bun run src/scripts/ocr.ts",
+    "sessions:add": "SESSION_ACTION=manual bun run src/scripts/sessions.ts",
+    "sessions:parse": "SESSION_ACTION=parse bun run src/scripts/sessions.ts"
   },
   "type": "module",
   "dependencies": {
+    "@mtcute/bun": "^0.16.9",
+    "@mtcute/convert": "^0.16.9",
+    "@mtcute/http-proxy": "^0.16.9",
     "js-yaml": "^4.1.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "user-agents": "^1.1.325"
   }
 }
