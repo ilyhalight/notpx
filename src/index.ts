@@ -15,6 +15,13 @@ import type {
 import { ConfigRequest } from "./requests/config";
 import type { Config } from "./types/config";
 import { GoodItem, type Boosts, type Goods } from "./types/users";
+import { getSessionsData } from "./sessions";
+import { getInitData } from "./initData";
+import { isDataObj, randDelay } from "./utils";
+
+const PIXELS_KEYS = ["initialPos", "width", "height", "totalPixels", "pixels"];
+const isOCRData = (data: Record<string, any>) =>
+  isDataObj<OCRData>(data, PIXELS_KEYS);
 
 class NotPixelBot {
   initialPos: PixelInput;
@@ -36,8 +43,10 @@ class NotPixelBot {
   useFastRecharge = false;
   checkPixelInfo = false;
   setPixelsToMap = true;
-  claimDelay = config.claimDelay * 1000;
-  intervalDelay = config.delay * 1000;
+
+  nextClaimDelay = 0;
+  nextRunDelay = config.runDelay.onStart * 1000;
+  maxLifetime = config.maxLifetime * 1000;
   timer: ReturnType<typeof setTimeout> | undefined = undefined;
 
   constructor(image: OCRData) {
@@ -51,8 +60,15 @@ class NotPixelBot {
     this.checkPixelInfo = config.checkPixelInfo;
     this.setPixelsToMap = config.setPixelsToMap;
     this.calcPixels();
-    this.getInitAccountsData();
   }
+
+  randClaimDelay = () =>
+    randDelay(config.claimDelay.min, config.claimDelay.max);
+
+  randRunDelay = () => randDelay(config.runDelay.min, config.runDelay.max);
+
+  randRequestDelay = () =>
+    randDelay(config.requestsDelay.min, config.requestsDelay.max);
 
   calcPixels() {
     const [initX, initY] = this.initialPos;
@@ -64,20 +80,21 @@ class NotPixelBot {
     return this;
   }
 
-  getRequestData(auth: string) {
+  getRequestData(account: Account) {
     return {
-      userAgent: config.userAgent,
+      userAgent: account.sessionData.userAgent,
       domain: config.domain,
-      auth,
+      auth: account.auth as string,
       origin: config.origin,
+      userId: account.userId,
     };
   }
 
   async getBaseConfig() {
     this.notpxConfig = await new ConfigRequest().getConfig();
     if (!this.notpxConfig) {
-      console.error(
-        "Auto upgrade disabled, because failed to get notpx config"
+      console.warn(
+        "⚠️ | Auto upgrade disabled, because failed to get notpx config"
       );
       this.autoUpgrade = false;
     }
@@ -109,63 +126,148 @@ class NotPixelBot {
     )?.level;
   }
 
-  getInitAccountsData() {
-    this.accountsData = config.auth.map((auth, idx) => {
-      console.log(`Account #${idx}. Getting init data...`);
-      return {
-        id: idx + 1,
-        balance: 0,
-        tokens: 0,
-        repaintsTotal: 0,
-        auth,
-        lastErrorAt: 0,
-        boosts: {} as Boosts,
-        goods: {} as Goods,
-      };
-    });
+  async getInitAccountsData() {
+    const sessions = await getSessionsData();
+
+    this.accountsData = await Promise.all(
+      sessions.map(async (session, idx) => {
+        console.log(`🦊 | Account #${session.id}. Getting initData...`);
+        let auth = null;
+        try {
+          auth = await getInitData(session);
+        } catch (err) {
+          console.error(
+            `😢 | Failed to get auth data for #${session.id} @${
+              session.username
+            } | ${session.firstName} ${session.lastName}, ${
+              (err as Error).message
+            }`
+          );
+        }
+
+        return {
+          id: idx + 1,
+          userId: session.id,
+          balance: 0,
+          tokens: 0,
+          repaintsTotal: 0,
+          sessionData: session,
+          auth,
+          lastRenewAt: Date.now(),
+          lastErrorAt: 0,
+          boosts: {} as Boosts,
+          goods: {} as Goods,
+        };
+      })
+    );
 
     return this;
   }
 
-  async getAccountsData() {
-    console.log("Get accounts data...");
+  async tryRenewAuth() {
     this.accountsData = await Promise.all(
       this.accountsData.map(async (account) => {
-        console.log(`Account #${account.id}. Getting account mining status...`);
+        if (
+          account.auth &&
+          account.lastRenewAt + this.maxLifetime > Date.now()
+        ) {
+          return account;
+        }
+
+        const { sessionData: session } = account;
+        console.log(`🦊 | Account #${session.id}. Getting initData...`);
+        let auth = null;
+        try {
+          auth = await getInitData(session);
+        } catch (err) {
+          console.error(
+            `❌ | Failed to get auth data for #${session.id} @${
+              session.username
+            } | ${session.firstName} ${session.lastName}, ${
+              (err as Error).message
+            }`
+          );
+        }
+
+        return {
+          ...account,
+          auth,
+          lastRenewAt: Date.now(),
+        };
+      })
+    );
+  }
+
+  async getAccountsData() {
+    this.accountsData = await Promise.all(
+      this.accountsData.map(async (account) => {
+        if (!account.auth) {
+          console.log(
+            `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+          );
+          return account;
+        }
+
+        console.log(
+          `📦 | Account #${account.userId}. Getting account mining status with random delay...`
+        );
+        await sleep(this.randRequestDelay());
         const miningStatus = await new UsersRequest(
-          this.getRequestData(account.auth)
+          this.getRequestData(account)
         ).getMiningStatus();
         const balance = miningStatus?.charges ?? 0;
         return {
           ...account,
           balance,
           tokens: miningStatus?.userBalance ?? 0,
-          lastErrorAt: balance ? 0 : account.lastErrorAt,
+          lastErrorAt: balance ? 0 : Date.now(),
           boosts: miningStatus?.boosts ?? ({} as Boosts),
           goods: miningStatus?.goods ?? ({} as Goods),
           repaintsTotal: miningStatus?.repaintsTotal ?? 0,
         };
       })
     );
-    console.log("Finish get accounts data");
+    return this;
+  }
+
+  async activateAccounts() {
+    this.accountsData = await Promise.all(
+      this.accountsData.map(async (account) => {
+        if (!account.auth) {
+          console.log(
+            `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+          );
+          return account;
+        }
+
+        console.log(
+          `🤖 | Account #${account.userId}. Activating account with random delay...`
+        );
+        await sleep(this.randRequestDelay());
+        await new UsersRequest(this.getRequestData(account)).me();
+        return account;
+      })
+    );
     return this;
   }
 
   async setPixel(account: Account, pixel: OCRPixel) {
     const { x, y, color } = pixel;
-    console.log(`Account #${account.id}. Placing pixel to ${x} ${y}...`);
+    console.log(
+      `🎨 | Account #${account.userId}. Placing pixel to ${x} ${y}...`
+    );
     const result = await new PixelRequest(
-      this.getRequestData(account.auth)
+      this.getRequestData(account)
     ).setPixel(x, y, color);
     if (!result) {
-      console.error("Balance is emptied! Stop working...");
+      console.warn("💤 | Balance is emptied! Waiting...");
       account.balance = 0;
       account.lastErrorAt = Date.now();
       return this;
     }
 
     console.info(
-      `Account #${account.id}. ${styleText(
+      `🎨 | Account #${account.userId}. ${styleText(
         "green",
         `Successfully set pixel to ${x} ${y}`
       )}`
@@ -177,12 +279,12 @@ class NotPixelBot {
 
   async setPixelIfNeed(account: Account, pixel: OCRPixel) {
     const { x, y, color } = pixel;
-    console.log(`Account #${account.id}. Checking pixel ${x} ${y}...`);
+    console.log(`🔍 | Account #${account.userId}. Checking pixel ${x} ${y}...`);
 
-    const pixelRequest = new PixelRequest(this.getRequestData(account.auth));
+    const pixelRequest = new PixelRequest(this.getRequestData(account));
     const pixelInfo = await pixelRequest.getPixel(x, y);
     if (!pixelInfo || pixelInfo.pixel.color === color) {
-      console.log(`Account #${account.id}. Skip pixel ${x} ${y}...`);
+      console.log(`⏭️ | Account #${account.userId}. Skip pixel ${x} ${y}...`);
       account.balance += 1;
       this.placedPixels.push(pixel);
       return this;
@@ -192,6 +294,13 @@ class NotPixelBot {
   }
 
   async tryUpgradeRepaintLevel(account: Account) {
+    if (!account.auth) {
+      console.log(
+        `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+      );
+      return account;
+    }
+
     const { paintReward: currentRepaintLevel } = account.boosts;
     const nextRepaintLevel = this.repaintLevels.find(
       (repaintLevel) => repaintLevel.level === currentRepaintLevel + 1
@@ -205,7 +314,7 @@ class NotPixelBot {
     }
 
     const result = await new UsersRequest(
-      this.getRequestData(account.auth)
+      this.getRequestData(account)
     ).checkBoost("paintReward");
     if (!result) {
       return account;
@@ -213,7 +322,7 @@ class NotPixelBot {
 
     account.tokens -= nextRepaintLevel.price;
     console.log(
-      `Account #${account.id}. ${styleText(
+      `⬆️ | Account #${account.userId}. ${styleText(
         "green",
         `Successfully upgraded to ${nextRepaintLevel.level} repaint level for ${nextRepaintLevel.price}`
       )}. New balance: ${account.tokens}`
@@ -222,6 +331,13 @@ class NotPixelBot {
   }
 
   async tryUpgradeRechargeLevel(account: Account) {
+    if (!account.auth) {
+      console.log(
+        `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+      );
+      return account;
+    }
+
     const { reChargeSpeed: currentRechargeLevel } = account.boosts;
     const nextRechargeLevel = this.chargeRestorationLevels.find(
       (reChargeLevel) => reChargeLevel.level === currentRechargeLevel + 1
@@ -235,7 +351,7 @@ class NotPixelBot {
     }
 
     const result = await new UsersRequest(
-      this.getRequestData(account.auth)
+      this.getRequestData(account)
     ).checkBoost("reChargeSpeed");
     if (!result) {
       return account;
@@ -243,7 +359,7 @@ class NotPixelBot {
 
     account.tokens -= nextRechargeLevel.price;
     console.log(
-      `Account #${account.id}. ${styleText(
+      `⬆️ | Account #${account.userId}. ${styleText(
         "green",
         `Successfully upgraded to ${nextRechargeLevel.level} recharge level for ${nextRechargeLevel.price}`
       )}. New balance: ${account.tokens}`
@@ -253,15 +369,25 @@ class NotPixelBot {
 
   async claimAndUpgrade() {
     const timestamp = Date.now();
-    if (timestamp < this.lastClaimedAt + this.claimDelay) {
+    if (timestamp < this.lastClaimedAt + this.nextClaimDelay) {
       return this;
     }
 
-    console.log("Claim all minings and upgrading...");
+    this.nextClaimDelay = this.randClaimDelay();
     this.accountsData = await Promise.all(
       this.accountsData.map(async (account) => {
-        console.log(`Account #${account.id}. Claiming minings...`);
-        const userRequest = new UsersRequest(this.getRequestData(account.auth));
+        if (!account.auth) {
+          console.log(
+            `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+          );
+          return account;
+        }
+
+        await sleep(this.randRequestDelay());
+        console.log(
+          `⛏️ | Account #${account.userId}. Claiming minings with random delay...`
+        );
+        const userRequest = new UsersRequest(this.getRequestData(account));
         const miningStatus = await userRequest.claim();
         if (!miningStatus) {
           return account;
@@ -269,7 +395,7 @@ class NotPixelBot {
 
         account.tokens += miningStatus.claimed;
         console.log(
-          `Account #${account.id}. New balance: ${account.tokens}. Total repaints: ${account.repaintsTotal}`
+          `💰 | Account #${account.userId}. New balance: ${account.tokens}. Total repaints: ${account.repaintsTotal}`
         );
         if (!this.autoUpgrade) {
           return account;
@@ -290,9 +416,15 @@ class NotPixelBot {
       return this;
     }
 
-    console.log("Trying activate specials...");
     this.accountsData = await Promise.all(
       this.accountsData.map(async (account) => {
+        if (!account.auth) {
+          console.log(
+            `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+          );
+          return account;
+        }
+
         if (
           account.balance ||
           !Object.keys(account.goods).includes(String(GoodItem.FAST_REPAINT))
@@ -300,8 +432,11 @@ class NotPixelBot {
           return account;
         }
 
-        console.log(`Account #${account.id}. Activate fast repaints...`);
-        const userRequest = new UsersRequest(this.getRequestData(account.auth));
+        await sleep(this.randRequestDelay());
+        console.log(
+          `⚡ | Account #${account.userId}. Activate fast repaints...`
+        );
+        const userRequest = new UsersRequest(this.getRequestData(account));
         await userRequest.activateSpecial(GoodItem.FAST_REPAINT);
         return account;
       })
@@ -312,7 +447,7 @@ class NotPixelBot {
 
   findAvailableAccount() {
     return this.accountsData.find(
-      (account) => account.balance > 0 && !account.lastErrorAt
+      (account) => account.auth && account.balance > 0 && !account.lastErrorAt
     );
   }
 
@@ -339,8 +474,10 @@ class NotPixelBot {
           }
 
           account.balance -= 1;
-          console.log(`Account #${account.id}. Randomize delay...`);
-          await sleep(Math.random() * 1000);
+          console.log(
+            `🚧 | Account #${account.userId}. Randomize delay before set pixel...`
+          );
+          await sleep(this.randRequestDelay());
 
           this.checkPixelInfo
             ? await this.setPixelIfNeed(account, pixel)
@@ -353,6 +490,7 @@ class NotPixelBot {
   }
 
   async run() {
+    await this.tryRenewAuth();
     await this.getAccountsData();
     await this.activateSpecials();
     await this.claimAndUpgrade();
@@ -360,31 +498,48 @@ class NotPixelBot {
     return this;
   }
 
+  protected async runTimed() {
+    await this.run();
+    this.nextRunDelay = this.randRunDelay();
+    console.log(
+      `💤 | Sleeping ${Math.floor(this.nextRunDelay / 1000)} secs...`
+    );
+    this.timer = setTimeout(
+      async () => await this.runTimed(),
+      this.nextRunDelay
+    );
+  }
+
   async runInloop() {
     await this.getBaseConfig();
-    await this.run();
-    setInterval(async () => {
-      await this.run();
-    }, this.intervalDelay);
+    await this.activateAccounts();
+    await this.runTimed();
   }
 }
 
-const isOCRData = (data: Record<string, any>): data is OCRData =>
-  "initialPos" in data &&
-  "width" in data &&
-  "height" in data &&
-  "totalPixels" in data &&
-  "pixels" in data;
-
 async function main() {
-  console.log("Starting NotPixelBot...");
+  console.log(`
+ _   _       _    ______ _          _ 
+| \\ | |     | |   | ___ (_)        | |
+|  \\| | ___ | |_  | |_/ /___  _____| |
+| . ' |/ _ \\| __| |  __/| \\ \\/ / _ \\ |
+| |\\  | (_) | |_  | |   | |>  <  __/ |
+\\_| \\_/\\___/ \\__| \\_|   |_/_/\\_\\___|_|
+
+  🚀 | Github: https://github.com/ilyhalight/notpx
+  📦 | Dev: https://toil.cc
+
+If you bought this script, congratulations, you were scamed
+`);
   const file = Bun.file(path.resolve(__dirname, "..", "result.json"));
   const imageData = await file.json();
   if (!isOCRData(imageData)) {
     throw new Error("Image data doesn't found. Check README for get help");
   }
 
+  // todo: add logging?
   const bot = new NotPixelBot(imageData);
+  await bot.getInitAccountsData();
   await bot.runInloop();
 }
 
