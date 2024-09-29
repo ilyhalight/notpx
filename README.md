@@ -29,9 +29,10 @@
 bun install
 ```
 
-3. Fill auth data in the config in `src/config.ts`
-4. Fill pixels data in `result.json` and set `initialPos`
-5. Run:
+3. Add sessions (read below)
+4. Configure bot in the config in `src/config.ts`
+5. Fill pixels data in `result.json` and set `initialPos`
+6. Run:
 
 ```bash
 bun start
