@@ -307,6 +307,7 @@ class NotPixelBot {
     ) as RepaintLevel;
     if (
       !this.maxRepaintLevel ||
+      !nextRepaintLevel ||
       currentRepaintLevel >= this.maxRepaintLevel ||
       nextRepaintLevel.price > account.tokens
     ) {
@@ -344,6 +345,7 @@ class NotPixelBot {
     ) as ChargeRestorationLevel;
     if (
       !this.maxRepaintLevel ||
+      !nextRechargeLevel ||
       currentRechargeLevel >= this.maxRepaintLevel ||
       nextRechargeLevel.price > account.tokens
     ) {
