@@ -143,9 +143,10 @@ const chars = {
 };
 
 const colorWidth = 4;
+const rootPath = path.resolve(__dirname, "..", "..");
 
 async function main() {
-  const file = Bun.file(path.resolve(__dirname, "..", "result.png"));
+  const file = Bun.file(path.resolve(rootPath, "result.png"));
   const buffer = await file.arrayBuffer();
   const png = new PNG({ colorType: 2 }).parse(buffer);
 
@@ -197,10 +198,7 @@ async function main() {
     ),
   } as OCRData;
 
-  Bun.write(
-    path.resolve(__dirname, "..", "result.json"),
-    JSON.stringify(result)
-  );
+  Bun.write(path.resolve(rootPath, "result.json"), JSON.stringify(result));
 
   const image = pixels
     .map((line) => line.map((color) => color.symbol).join(""))
@@ -210,7 +208,7 @@ async function main() {
     Result saved to ${styleText("yellow", "result.json")}
     Image Preview saved to ${styleText("yellowBright", "result.txt")}
   `);
-  Bun.write(path.resolve(__dirname, "..", "result.txt"), image);
+  Bun.write(path.resolve(rootPath, "result.txt"), image);
 }
 
 await main();
