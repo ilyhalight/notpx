@@ -22,6 +22,10 @@ export async function getInitData(sessionData: SessionData) {
 
   await tg.start({
     session: sessionData.session,
+    // maybe this disable auto login on invalid session
+    phone: () => "",
+    code: () => "",
+    password: () => "",
   });
 
   const peer = await tg.resolvePeer("notpixel");
