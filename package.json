@@ -1,5 +1,6 @@
 {
   "name": "notpx",
+  "version": "1.4.0",
   "module": "src/index.ts",
   "devDependencies": {
     "@types/bun": "latest",
@@ -12,7 +13,7 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "map": "bun run src/scripts/map.ts",
-    "ocr": "bun run src/scripts/ocr.ts",
+    "ocr": "OCR_ACTION=start bun run src/scripts/ocr.ts",
     "sessions:add": "SESSION_ACTION=manual bun run src/scripts/sessions.ts",
     "sessions:parse": "SESSION_ACTION=parse bun run src/scripts/sessions.ts"
   },
