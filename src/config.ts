@@ -1,6 +1,8 @@
 import path from "node:path";
+import { version } from "../package.json";
 
 export default {
+  version,
   domain: "notpx.app",
   origin: "https://app.notpx.app",
   configDomain: "npx-cdn.fra1.cdn.digitaloceanspaces.com",
@@ -11,6 +13,8 @@ export default {
   sessionsFolder: path.join(__dirname, "..", "sessions"),
   screenshotsFolder: path.join(__dirname, "..", "map"),
   referalId: Bun.env.REFERAL_ID ?? "f587778212",
+  useTemplate: false,
+  templateId: Bun.env.TEMPLATE_ID ?? "6578955397", // get by list of tempalates, or by templateId of image in desktop version or by sniffing requests
   autoUpgrade: true,
   useFastRecharge: true, // fast recharge by goods
   checkPixelInfo: true,
@@ -28,6 +32,11 @@ export default {
     max: 15,
   },
   claimDelay: {
+    // seconds
+    min: 1200,
+    max: 4800,
+  },
+  updateTemplateDelay: {
     // seconds
     min: 1200,
     max: 4800,

@@ -18,18 +18,21 @@ import { GoodItem, type Boosts, type Goods } from "./types/users";
 import { getSessionsData } from "./sessions";
 import { getInitData } from "./initData";
 import { isDataObj, randDelay } from "./utils";
+import { TemplateRequest } from "./requests/templates";
+import { convertToPixels } from "./scripts/ocr";
 
 const PIXELS_KEYS = ["initialPos", "width", "height", "totalPixels", "pixels"];
 const isOCRData = (data: Record<string, any>) =>
   isDataObj<OCRData>(data, PIXELS_KEYS);
 
 class NotPixelBot {
-  initialPos: PixelInput;
-  width: number;
-  height: number;
-  pixels: OCRPixel[];
-  initialPixels: OCRPixel[];
-  placedPixels: OCRPixel[];
+  initialPos!: PixelInput;
+  width!: number;
+  height!: number;
+  pixels!: OCRPixel[];
+  initialPixels!: OCRPixel[];
+  placedPixels!: OCRPixel[];
+  templateId: string | undefined;
   notpxConfig: Config | undefined;
   maxRepaintLevel: number | undefined;
   maxChargeRestorationLevel: number | undefined;
@@ -39,31 +42,44 @@ class NotPixelBot {
   chargeRestorationLevels: ChargeRestorationLevel[] = [];
   totalPlaced = 0;
   lastClaimedAt = 0;
+  lastUpdatedTemplateAt = 0;
   autoUpgrade = false;
   useFastRecharge = false;
   checkPixelInfo = false;
   setPixelsToMap = true;
+  useTemplate = false;
 
   nextClaimDelay = 0;
+  nextUpdatedTemplateDelay = 0;
   nextRunDelay = config.runDelay.onStart * 1000;
   maxLifetime = config.maxLifetime * 1000;
   timer: ReturnType<typeof setTimeout> | undefined = undefined;
 
   constructor(image: OCRData) {
-    this.initialPos = image.initialPos;
-    this.width = image.width;
-    this.height = image.height;
-    this.pixels = image.pixels;
-    this.initialPixels = this.placedPixels = [];
     this.autoUpgrade = config.autoUpgrade;
     this.useFastRecharge = config.useFastRecharge;
     this.checkPixelInfo = config.checkPixelInfo;
     this.setPixelsToMap = config.setPixelsToMap;
+    this.useTemplate = config.useTemplate;
+    this.templateId = config.templateId;
+    this.updateImage(image);
+  }
+
+  updateImage(image: OCRData) {
+    this.initialPos = image.initialPos;
+    this.initialPixels = this.placedPixels = [];
+    this.width = image.width;
+    this.height = image.height;
+    this.pixels = image.pixels;
     this.calcPixels();
+    return this;
   }
 
   randClaimDelay = () =>
     randDelay(config.claimDelay.min, config.claimDelay.max);
+
+  randUpdateTemplateDelay = () =>
+    randDelay(config.updateTemplateDelay.min, config.updateTemplateDelay.max);
 
   randRunDelay = () => randDelay(config.runDelay.min, config.runDelay.max);
 
@@ -244,7 +260,17 @@ class NotPixelBot {
           `🤖 | Account #${account.userId}. Activating account with random delay...`
         );
         await sleep(this.randRequestDelay());
-        await new UsersRequest(this.getRequestData(account)).me();
+        const requestData = this.getRequestData(account);
+        await new UsersRequest(requestData).me();
+        if (this.useTemplate && this.templateId) {
+          console.log(
+            `🖼️ | Account #${account.userId}. Activating template with id ${this.templateId}...`
+          );
+          await sleep(this.randRequestDelay());
+          await new TemplateRequest(
+            this.getRequestData(account)
+          ).subscribeTemplate(this.templateId);
+        }
         return account;
       })
     );
@@ -413,6 +439,58 @@ class NotPixelBot {
     return this;
   }
 
+  async updateTemplate() {
+    if (!this.useTemplate || !this.templateId) {
+      return this;
+    }
+
+    const timestamp = Date.now();
+    if (
+      timestamp <
+      this.lastUpdatedTemplateAt + this.nextUpdatedTemplateDelay
+    ) {
+      return this;
+    }
+
+    this.nextUpdatedTemplateDelay = this.randUpdateTemplateDelay();
+    console.log(`🖼️ | Updating template data...`);
+    const templateRequest = new TemplateRequest(
+      this.getRequestData(this.accountsData[0])
+    );
+    const templateData = await templateRequest.getTemplate(this.templateId);
+    if (!templateData) {
+      return this;
+    }
+
+    const imageBlob = await templateRequest.getTemplateImage(this.templateId);
+    if (!imageBlob) {
+      return this;
+    }
+
+    const { x, y } = templateData;
+
+    try {
+      const imageArrayBuffer = await imageBlob.arrayBuffer();
+      const { result: imageData } = await convertToPixels(imageArrayBuffer);
+      imageData.initialPos = [x, y];
+
+      this.updateImage(imageData);
+      console.info(
+        `🖼️ | ${styleText(
+          "green",
+          `Successfully updated image data for template #${this.templateId} (${x}, ${y})`
+        )}`
+      );
+    } catch (err) {
+      console.error(
+        `❌ | Error on updating template image: ${(err as Error).message}`
+      );
+    }
+
+    this.lastUpdatedTemplateAt = Date.now();
+    return this;
+  }
+
   async activateSpecials() {
     if (!this.useFastRecharge) {
       return this;
@@ -494,6 +572,7 @@ class NotPixelBot {
   async run() {
     await this.tryRenewAuth();
     await this.getAccountsData();
+    await this.updateTemplate();
     await this.activateSpecials();
     await this.claimAndUpgrade();
     await this.setPixels();
@@ -528,6 +607,7 @@ async function main() {
 | |\\  | (_) | |_  | |   | |>  <  __/ |
 \\_| \\_/\\___/ \\__| \\_|   |_/_/\\_\\___|_|
 
+  ⚓ | Bot version: ${config.version}
   🚀 | Github: https://github.com/ilyhalight/notpx
   📦 | Dev: https://toil.cc
 
