@@ -1,3 +1,9 @@
+# 1.4.1
+
+- Fix invalid file signature on request template image
+- Fix auto request input login on invalid session
+- Added max upgrades level (By default, each level is 999, improves to the maximum level from the notpx configuration)
+
 # 1.4.0
 
 - Added support drawing by template (set templateId and useTemplate to `true` in `src/config.ts`)

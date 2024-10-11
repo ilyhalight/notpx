@@ -1,6 +1,6 @@
 {
   "name": "notpx",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "module": "src/index.ts",
   "devDependencies": {
     "@types/bun": "latest",

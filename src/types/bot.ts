@@ -30,3 +30,10 @@ export type ChargeRestorationLevel = {
   chargeBoost: number;
   max: boolean;
 };
+
+export type ChargeCountLevel = {
+  level: number;
+  price: number;
+  boost: number;
+  max: boolean;
+};

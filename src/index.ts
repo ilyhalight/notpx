@@ -8,6 +8,7 @@ import { UsersRequest } from "./requests/users";
 import type { OCRData, OCRPixel } from "./types/ocr";
 import type {
   Account,
+  ChargeCountLevel,
   ChargeRestorationLevel,
   PixelInput,
   RepaintLevel,
@@ -36,10 +37,13 @@ class NotPixelBot {
   notpxConfig: Config | undefined;
   maxRepaintLevel: number | undefined;
   maxChargeRestorationLevel: number | undefined;
+  maxChargeCountLevel: number | undefined;
+  maxUpgrades;
 
   accountsData: Account[] = [];
   repaintLevels: RepaintLevel[] = [];
   chargeRestorationLevels: ChargeRestorationLevel[] = [];
+  chargeCountLevels: ChargeCountLevel[] = [];
   totalPlaced = 0;
   lastClaimedAt = 0;
   lastUpdatedTemplateAt = 0;
@@ -62,6 +66,7 @@ class NotPixelBot {
     this.setPixelsToMap = config.setPixelsToMap;
     this.useTemplate = config.useTemplate;
     this.templateId = config.templateId;
+    this.maxUpgrades = config.maxUpgrades;
     this.updateImage(image);
   }
 
@@ -138,6 +143,18 @@ class NotPixelBot {
       max: level[1].Max ?? false,
     }));
     this.maxChargeRestorationLevel = this.chargeRestorationLevels.find(
+      (level) => level.max
+    )?.level;
+
+    this.chargeCountLevels = Object.entries(
+      this.notpxConfig!.UpgradeChargeCount.levels
+    ).map((level) => ({
+      level: +level[0],
+      price: level[1].Price,
+      boost: level[1].Boost,
+      max: level[1].Max ?? false,
+    }));
+    this.maxChargeCountLevel = this.chargeCountLevels.find(
       (level) => level.max
     )?.level;
   }
@@ -334,6 +351,7 @@ class NotPixelBot {
     if (
       !this.maxRepaintLevel ||
       !nextRepaintLevel ||
+      currentRepaintLevel >= this.maxUpgrades.repaintLevel ||
       currentRepaintLevel >= this.maxRepaintLevel ||
       nextRepaintLevel.price > account.tokens
     ) {
@@ -370,9 +388,10 @@ class NotPixelBot {
       (reChargeLevel) => reChargeLevel.level === currentRechargeLevel + 1
     ) as ChargeRestorationLevel;
     if (
-      !this.maxRepaintLevel ||
+      !this.maxChargeRestorationLevel ||
       !nextRechargeLevel ||
-      currentRechargeLevel >= this.maxRepaintLevel ||
+      currentRechargeLevel >= this.maxUpgrades.rechargeLevel ||
+      currentRechargeLevel >= this.maxChargeRestorationLevel ||
       nextRechargeLevel.price > account.tokens
     ) {
       return account;
@@ -390,6 +409,45 @@ class NotPixelBot {
       `⬆️ | Account #${account.userId}. ${styleText(
         "green",
         `Successfully upgraded to ${nextRechargeLevel.level} recharge level for ${nextRechargeLevel.price}`
+      )}. New balance: ${account.tokens}`
+    );
+    return account;
+  }
+
+  async tryUpgradeEnergyLevel(account: Account) {
+    if (!account.auth) {
+      console.log(
+        `❄️ | Account #${account.userId}. Skipping unauthorized account...`
+      );
+      return account;
+    }
+
+    const { energyLimit: currentEnergyLimit } = account.boosts;
+    const nextEnergyLevel = this.chargeCountLevels.find(
+      (energyLimit) => energyLimit.level === currentEnergyLimit + 1
+    ) as ChargeCountLevel;
+    if (
+      !this.maxChargeCountLevel ||
+      !nextEnergyLevel ||
+      currentEnergyLimit >= this.maxUpgrades.energyLimit ||
+      currentEnergyLimit >= this.maxChargeCountLevel ||
+      nextEnergyLevel.price > account.tokens
+    ) {
+      return account;
+    }
+
+    const result = await new UsersRequest(
+      this.getRequestData(account)
+    ).checkBoost("energyLimit");
+    if (!result) {
+      return account;
+    }
+
+    account.tokens -= nextEnergyLevel.price;
+    console.log(
+      `⬆️ | Account #${account.userId}. ${styleText(
+        "green",
+        `Successfully upgraded to ${nextEnergyLevel.level} energy level for ${nextEnergyLevel.price}`
       )}. New balance: ${account.tokens}`
     );
     return account;
@@ -431,6 +489,7 @@ class NotPixelBot {
 
         account = await this.tryUpgradeRepaintLevel(account);
         account = await this.tryUpgradeRechargeLevel(account);
+        account = await this.tryUpgradeEnergyLevel(account);
         return account;
       })
     );

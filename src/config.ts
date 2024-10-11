@@ -16,6 +16,11 @@ export default {
   useTemplate: Bun.env.USE_TEMPLATE === "true",
   templateId: Bun.env.TEMPLATE_ID || "6578955397", // get by list of tempalates, or by templateId of image in desktop version or by sniffing requests
   autoUpgrade: Bun.env.AUTO_UPGRADE === "true",
+  maxUpgrades: {
+    repaintLevel: Number(Bun.env.MAX_REPAINT_LEVEL ?? 999),
+    rechargeLevel: Number(Bun.env.MAX_RECHARGE_LEVEL ?? 999),
+    energyLimit: Number(Bun.env.MAX_ENERGY_LEVEL ?? 999),
+  },
   useFastRecharge: Bun.env.USE_FAST_RECHARGE === "true", // fast recharge by goods
   checkPixelInfo: Bun.env.CHECK_PIXEL_INFO === "true",
   setPixelsToMap: Bun.env.SET_PIXELS_TO_MAP === "true",

@@ -21,5 +21,8 @@ declare module "bun" {
     USE_TEMPLATE?: string;
     AUTO_UPGRADE?: string;
     TEMPLATE_ID?: string;
+    MAX_REPAINT_LEVEL?: number;
+    MAX_RECHARGE_LEVEL?: number;
+    MAX_ENERGY_LEVEL?: number;
   }
 }
