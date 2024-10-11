@@ -12,8 +12,9 @@
 3. Auto upgrade boosts
 4. Auto use fast recharge boost if exists
 5. Saving screenshots of the map (if necessary, additionally run the `bun run map` file)
-6. Automatic image conversion to coordinates (Not all images are supported, read more below!!!)
-7. Functions have been made for the entire NotPixel API, if something is missing in the bot, you can easily add it without even getting into the game itself
+6. Draw by template (disabled by default)
+7. Automatic image conversion to coordinates (Not all images are supported, read more below!!!)
+8. Functions have been made for the entire NotPixel API, if something is missing in the bot, you can easily add it without even getting into the game itself
 
 * All tasks are delayed. Every account has its own user agent
 * The bot works linearly, i.e. it goes along the line until it finishes the cycle
@@ -126,11 +127,11 @@ When the bot is launched, as well as every 20-80 minutes (configurable), the tem
     ![full find template Id](images/desktop-get-template-id.png)
 
 2. Open `.env` (read above)
-3. Insert templateId to `TEMPLATE_ID` field in .env
+3. Insert TEMPLATE_ID to `TEMPLATE_ID` field in .env
 
 ![config template id field](images/config-template-id.png)
 
-4. Set useTemplate field to `true` (default: `false`)
+4. Set USE_TEMPLATE field to `true` (default: `false`)
 
 ![config use template field](images/config-use-template.png)
 
@@ -159,7 +160,7 @@ In this example, change 141 to X coordinate, 309 to Y coordinate of canvas
 
 5. Save the file
 6. Open `.env` (read above)
-7. Set useTemplate field to `false` (default: `false`)
+7. Set USE_TEMPLATE field to `false` (default: `false`)
 
 ![config use template field](images/config-use-template-false.png)
 
