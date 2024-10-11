@@ -11,7 +11,7 @@ export class ShopRequest extends BaseRequest {
       }
 
       return data as CurrentUser;
-    } catch (err: unknown) {
+    } catch (err) {
       console.error(
         "Failed to get shop buy list, reason:",
         (err as Error)?.message

@@ -32,7 +32,7 @@ export class ConfigRequest extends BaseRequest {
       const data = await res.text();
       const doc = yaml.load(data);
       return doc as Config;
-    } catch (err: unknown) {
+    } catch (err) {
       console.error(
         "Failed to get base config, reason:",
         (err as Error)?.message

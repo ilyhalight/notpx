@@ -47,6 +47,8 @@ export interface CurrentUser extends PixelOwner {
   language: "en";
   isPremium: boolean;
   isBetaTester: boolean;
+  templateId: number;
+  websocketToken: string;
 }
 
 export type Boost = "energyLimit" | "paintReward" | "reChargeSpeed";

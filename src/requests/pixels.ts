@@ -23,7 +23,7 @@ export class PixelRequest extends BaseRequest {
       }
 
       return data as GetPixelResponse;
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Failed to get pixel, reason:", (err as Error)?.message);
       return undefined;
     }
@@ -45,7 +45,7 @@ export class PixelRequest extends BaseRequest {
       }
 
       return data as SetPixelResponse;
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Failed to set pixel, reason:", (err as Error)?.message);
       return undefined;
     }
@@ -56,7 +56,7 @@ export class PixelRequest extends BaseRequest {
     try {
       const res = await this.request("/api/v2/image/");
       return await res.blob();
-    } catch (err: unknown) {
+    } catch (err) {
       console.error("Failed to get image, reason:", (err as Error)?.message);
       return undefined;
     }
