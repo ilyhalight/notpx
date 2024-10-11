@@ -23,7 +23,20 @@
 
 ## Install
 
-1. Install [Bun.sh](https://bun.sh)
+1. Install [Bun.sh](https://bun.sh) (<=1.1.29)
+
+    For windows:
+
+    ```
+    iex "& {$(irm https://bun.sh/install.ps1)} -Version 1.1.29"
+    ```
+
+    For linux:
+
+    ```
+    curl -fsSL https://bun.sh/install | bash -s "bun-v1.1.29"
+    ```
+
 2. Install dependencies:
 
 ```bash
