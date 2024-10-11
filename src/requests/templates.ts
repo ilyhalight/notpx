@@ -42,7 +42,9 @@ export class TemplateRequest extends BaseRequest {
       const res = await fetch(
         `https://static.notpx.app/templates/${templateId}.png`,
         {
-          ...this.getRequestOpts(),
+          headers: {
+            "User-Agent": this.userAgent,
+          },
         }
       );
       return await res.blob();
