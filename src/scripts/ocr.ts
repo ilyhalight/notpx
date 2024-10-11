@@ -145,9 +145,10 @@ const chars = {
 const colorWidth = 4;
 const rootPath = path.resolve(__dirname, "..", "..");
 
-async function main() {
-  const file = Bun.file(path.resolve(rootPath, "result.png"));
-  const buffer = await file.arrayBuffer();
+export async function convertToPixels(
+  buffer: ArrayBuffer | Buffer,
+  debug = false
+) {
   const png = new PNG({ colorType: 2 }).parse(buffer);
 
   let colorLine: ColorLine = [];
@@ -177,7 +178,7 @@ async function main() {
       line.map((color, colorIdx) => {
         const colorString = color.toString();
         if (!Object(chars).hasOwnProperty(colorString)) {
-          console.log(colorString);
+          debug && console.log(colorString);
         }
 
         return {
@@ -197,6 +198,13 @@ async function main() {
       (pixel) => pixel.color
     ),
   } as OCRData;
+  return { result, pixels };
+}
+
+async function main() {
+  const file = Bun.file(path.resolve(rootPath, "result.png"));
+  const buffer = await file.arrayBuffer();
+  const { result, pixels } = await convertToPixels(buffer, true);
 
   Bun.write(path.resolve(rootPath, "result.json"), JSON.stringify(result));
 
@@ -211,4 +219,6 @@ async function main() {
   Bun.write(path.resolve(rootPath, "result.txt"), image);
 }
 
-await main();
+if (Bun.env.OCR_ACTION === "start") {
+  await main();
+}
