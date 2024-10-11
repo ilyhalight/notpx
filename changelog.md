@@ -1,3 +1,13 @@
+# 1.4.0
+
+- Added support drawing by template (set templateId and useTemplate to `true` in `src/config.ts`)
+
+  When the bot is launched, as well as every 20-80 minutes (configurable), the template will be automatically updated according to the specified templateId. There may be minimal inaccuracies, because image automatic converted to pixels by Bot.
+
+- Added update template delay
+- Added support templates requests
+- Fix OCR root path
+
 # 1.3.1
 
 - Fix rarely crash on try upgrade account

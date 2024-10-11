@@ -104,12 +104,47 @@ proxy: ["https://...:443", "http://...:8053"],
 
 ### How to convert image to coords?
 
+#### From NotPixel Template
+
+Add a template to NotPixel or find any one you like.
+
+When the bot is launched, as well as every 20-80 minutes (configurable), the template will be automatically updated according to the specified templateId. There may be minimal inaccuracies, because image automatic converted to pixels by Bot.
+
+1. Get template id
+
+    1. Open Desktop version
+    2. Go to templates and select your template
+    3. Open DevTools and select image
+
+    ![template image in ui](images/desktop-select-image.png)
+
+    4. Find templateId
+
+    ![template id in devtools](images/desktop-template-id.png)
+
+    full image:
+    ![full find template Id](images/desktop-get-template-id.png)
+
+2. Open `.env` (read above)
+3. Insert templateId to `TEMPLATE_ID` field in .env
+
+![config template id field](images/config-template-id.png)
+
+4. Open `src/config.ts`
+5. Set useTemplate field to `true` (default: `false`)
+
+![config use template field](images/config-use-template.png)
+
+6. Done
+
+#### From .png
+
 > [!CAUTION]
 > The image should be as clear as possible and have only the colors specified in the `src/types/pixels.ts` file (transparent supported).
 > The resolution of the image must match the resolution of what you are drawing. If you want to draw 32x32, then the picture should also be 32x32, etc.
 > Only `.png` is supported!
 
-It is best if you draw the image in Figma and export it to `.png` there.
+It's best if you draw the image in Figma and export it to `.png` there.
 
 1. Copy your image to the parent folder and name it `result.png`
 2. Run script:
@@ -123,7 +158,11 @@ bun ocr
 
 In this example, change 141 to X coordinate, 309 to Y coordinate of canvas
 
-5. Save the file
+5. Set useTemplate field to `false` (default: `false`)
+
+![config use template field](images/config-use-template-false.png)
+
+6. Save the file
 
 ## About chances of being banned
 
