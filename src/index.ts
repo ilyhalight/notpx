@@ -619,7 +619,6 @@ If you bought this script, congratulations, you were scamed
     throw new Error("Image data doesn't found. Check README for get help");
   }
 
-  // todo: add logging?
   const bot = new NotPixelBot(imageData);
   await bot.getInitAccountsData();
   await bot.runInloop();

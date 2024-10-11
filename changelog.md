@@ -6,6 +6,7 @@
 
 - Added update template delay
 - Added support templates requests
+- Moved part of important fields from `config.ts` to `.env`
 - Fix OCR root path
 
 # 1.3.1

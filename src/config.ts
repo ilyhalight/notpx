@@ -12,13 +12,13 @@ export default {
   maxLifetime: 1700, // seconds (real lifetime is 30 mins, but we get only ~28 mins to prevent errors)
   sessionsFolder: path.join(__dirname, "..", "sessions"),
   screenshotsFolder: path.join(__dirname, "..", "map"),
-  referalId: Bun.env.REFERAL_ID ?? "f587778212",
+  referalId: Bun.env.REFERAL_ID || "f587778212",
   useTemplate: Bun.env.USE_TEMPLATE === "true",
-  templateId: Bun.env.TEMPLATE_ID ?? "6578955397", // get by list of tempalates, or by templateId of image in desktop version or by sniffing requests
-  autoUpgrade: true,
-  useFastRecharge: true, // fast recharge by goods
-  checkPixelInfo: true,
-  setPixelsToMap: true,
+  templateId: Bun.env.TEMPLATE_ID || "6578955397", // get by list of tempalates, or by templateId of image in desktop version or by sniffing requests
+  autoUpgrade: Bun.env.AUTO_UPGRADE === "true",
+  useFastRecharge: Bun.env.USE_FAST_RECHARGE === "true", // fast recharge by goods
+  checkPixelInfo: Bun.env.CHECK_PIXEL_INFO === "true",
+  setPixelsToMap: Bun.env.SET_PIXELS_TO_MAP === "true",
   screenMapDelay: 30, // seconds
   requestsDelay: {
     // seconds
