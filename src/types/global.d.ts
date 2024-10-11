@@ -18,6 +18,7 @@ declare module "bun" {
     SESSION_ACTION?: string;
     OCR_ACTION?: string;
     REFERAL_ID?: string;
+    USE_TEMPLATE?: string;
     TEMPLATE_ID?: string;
   }
 }

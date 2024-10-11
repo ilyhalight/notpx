@@ -13,7 +13,7 @@ export default {
   sessionsFolder: path.join(__dirname, "..", "sessions"),
   screenshotsFolder: path.join(__dirname, "..", "map"),
   referalId: Bun.env.REFERAL_ID ?? "f587778212",
-  useTemplate: false,
+  useTemplate: Bun.env.USE_TEMPLATE === "true",
   templateId: Bun.env.TEMPLATE_ID ?? "6578955397", // get by list of tempalates, or by templateId of image in desktop version or by sniffing requests
   autoUpgrade: true,
   useFastRecharge: true, // fast recharge by goods

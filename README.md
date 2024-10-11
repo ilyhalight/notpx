@@ -130,12 +130,11 @@ When the bot is launched, as well as every 20-80 minutes (configurable), the tem
 
 ![config template id field](images/config-template-id.png)
 
-4. Open `src/config.ts`
-5. Set useTemplate field to `true` (default: `false`)
+4. Set useTemplate field to `true` (default: `false`)
 
 ![config use template field](images/config-use-template.png)
 
-6. Done
+5. Done
 
 #### From .png
 
@@ -158,11 +157,13 @@ bun ocr
 
 In this example, change 141 to X coordinate, 309 to Y coordinate of canvas
 
-5. Set useTemplate field to `false` (default: `false`)
+5. Save the file
+6. Open `.env` (read above)
+7. Set useTemplate field to `false` (default: `false`)
 
 ![config use template field](images/config-use-template-false.png)
 
-6. Save the file
+8. Done
 
 ## About chances of being banned
 
