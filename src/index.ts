@@ -513,8 +513,18 @@ class NotPixelBot {
 
     this.nextUpdatedTemplateDelay = this.randUpdateTemplateDelay();
     console.log(`🖼️ | Updating template data...`);
+    const authenticatedAccount = this.accountsData.find(
+      (account) => account.auth
+    );
+    if (!authenticatedAccount) {
+      console.error(
+        "❌ | Error on find authenticated account for update template image"
+      );
+      return;
+    }
+
     const templateRequest = new TemplateRequest(
-      this.getRequestData(this.accountsData[0])
+      this.getRequestData(authenticatedAccount)
     );
     const templateData = await templateRequest.getTemplate(this.templateId);
     if (!templateData) {

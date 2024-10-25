@@ -1,3 +1,7 @@
+# 1.4.2
+
+- Now we are try to get template info only with authenticated account (previously, if the 1st account isn't unauthenticated, request will be rejected)
+
 # 1.4.1
 
 - Fix invalid file signature on request template image
@@ -56,7 +60,6 @@
 - Improved bot speed
 - Added support transparent background for OCR
 - Added color message about Set pixel action
-
 
 # 1.0.0
 
