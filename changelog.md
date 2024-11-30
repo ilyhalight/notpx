@@ -2,6 +2,9 @@
 
 - Added support NotPX tournament
 - Added stop on tournament break
+- Disabled auto upgrade by default
+- Set default template id
+- Set useTemplate to true by default
 - Updated calc pixel id logic
 
 # 1.4.2
