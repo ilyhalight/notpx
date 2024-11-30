@@ -26,6 +26,7 @@ export default {
   setPixelsToMap: Bun.env.SET_PIXELS_TO_MAP === "true",
   screenMapDelay: 30, // seconds
   canvasSize: 1024,
+  stopOnTournamentBreak: Bun.env.STOP_ON_TOURNAMENT_BREAK === "true",
   requestsDelay: {
     // seconds
     min: 0.1,

@@ -24,5 +24,6 @@ declare module "bun" {
     MAX_REPAINT_LEVEL?: number;
     MAX_RECHARGE_LEVEL?: number;
     MAX_ENERGY_LEVEL?: number;
+    STOP_ON_TOURNAMENT_BREAK?: string;
   }
 }

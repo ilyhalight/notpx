@@ -1,6 +1,7 @@
-# 1.5.0 [WIP]
+# 1.5.0
 
 - Added support NotPX tournament
+- Added stop on tournament break
 - Updated calc pixel id logic
 
 # 1.4.2

@@ -21,6 +21,8 @@ import { getInitData } from "./initData";
 import { isDataObj, randDelay } from "./utils";
 import { TemplateRequest } from "./requests/templates";
 import { convertToPixels } from "./scripts/ocr";
+import type { Period } from "./types/tournament";
+import { TournamentRequest } from "./requests/tournament";
 
 const PIXELS_KEYS = ["initialPos", "width", "height", "totalPixels", "pixels"];
 const isOCRData = (data: Record<string, any>) =>
@@ -41,6 +43,7 @@ class NotPixelBot {
   maxUpgrades;
 
   accountsData: Account[] = [];
+  currentRound: Period | undefined;
   repaintLevels: RepaintLevel[] = [];
   chargeRestorationLevels: ChargeRestorationLevel[] = [];
   chargeCountLevels: ChargeCountLevel[] = [];
@@ -52,6 +55,7 @@ class NotPixelBot {
   checkPixelInfo = false;
   setPixelsToMap = true;
   useTemplate = false;
+  stopOnTournamentBreak = true;
 
   nextClaimDelay = 0;
   nextUpdatedTemplateDelay = 0;
@@ -65,6 +69,7 @@ class NotPixelBot {
     this.checkPixelInfo = config.checkPixelInfo;
     this.setPixelsToMap = config.setPixelsToMap;
     this.useTemplate = config.useTemplate;
+    this.stopOnTournamentBreak = config.stopOnTournamentBreak;
     this.templateId = config.templateId;
     this.maxUpgrades = config.maxUpgrades;
     this.updateImage(image);
@@ -638,9 +643,50 @@ class NotPixelBot {
     return this;
   }
 
+  isRoundBreak() {
+    return (
+      this.currentRound &&
+      (new Date(this.currentRound.EndTime) > new Date() ||
+        this.currentRound.PeriodType === "break")
+    );
+  }
+
+  async checkRoundBreak() {
+    if (!this.stopOnTournamentBreak) {
+      return false;
+    }
+
+    console.log(`🖼️ | Check round break...`);
+    const authenticatedAccount = this.accountsData.find(
+      (account) => account.auth
+    );
+    if (!authenticatedAccount) {
+      console.error(
+        "❌ | Error on find authenticated account for Check round break"
+      );
+      return false;
+    }
+
+    if (this.isRoundBreak()) {
+      const periods = await new TournamentRequest(
+        this.getRequestData(authenticatedAccount)
+      ).getPeriods();
+      this.currentRound = periods?.activePeriod;
+
+      return this.isRoundBreak();
+    }
+
+    return false;
+  }
+
   async run() {
     await this.tryRenewAuth();
     await this.getAccountsData();
+    if (await this.checkRoundBreak()) {
+      console.warn(`⚠️ | Round break detected. Waiting...`);
+      return this;
+    }
+
     await this.updateTemplate();
     await this.activateSpecials();
     await this.claimAndUpgrade();
