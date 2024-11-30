@@ -5,7 +5,7 @@ export class TemplateRequest extends BaseRequest {
   async getList(offset: number = 0, limit: number = 12) {
     try {
       const res = await this.request(
-        `/api/v1/image/template/list?limit=${limit}&offset=${offset}`
+        `/api/v1/tournament/template/list?limit=${limit}&offset=${offset}`
       );
       return (await res.json()) as TemplateListItem[];
     } catch (err) {
@@ -19,7 +19,9 @@ export class TemplateRequest extends BaseRequest {
 
   async getTemplate(templateId: number | string = "my") {
     try {
-      const res = await this.request(`/api/v1/image/template/${templateId}`);
+      const res = await this.request(
+        `/api/v1/tournament/template/${templateId}`
+      );
       const data = await res.json();
       if (data.hasOwnProperty("error")) {
         throw new Error(data.error);
@@ -40,7 +42,7 @@ export class TemplateRequest extends BaseRequest {
       }
 
       const res = await fetch(
-        `https://static.notpx.app/templates/${templateId}.png`,
+        `https://static.notpx.app/tournament/${templateId}.png`,
         {
           headers: {
             "User-Agent": this.userAgent,
@@ -50,7 +52,7 @@ export class TemplateRequest extends BaseRequest {
       return await res.blob();
     } catch (err) {
       console.error(
-        "Failed to get image template, reason:",
+        "Failed to get tournament template, reason:",
         (err as Error)?.message
       );
       return undefined;
@@ -60,7 +62,7 @@ export class TemplateRequest extends BaseRequest {
   async subscribeTemplate(templateId: number | string) {
     try {
       const res = await this.request(
-        `/api/v1/image/template/subscribe/${templateId}`,
+        `/api/v1/tournament/template/subscribe/${templateId}`,
         {
           method: "PUT",
         }

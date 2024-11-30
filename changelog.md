@@ -1,3 +1,8 @@
+# 1.5.0 [WIP]
+
+- Added support NotPX tournament
+- Updated calc pixel id logic
+
 # 1.4.2
 
 - Now we are try to get template info only with authenticated account (previously, if the 1st account isn't unauthenticated, request will be rejected)
