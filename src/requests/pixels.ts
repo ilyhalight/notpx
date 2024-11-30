@@ -4,13 +4,11 @@ import type {
   GetPixelResponse,
   SetPixelResponse,
 } from "../types/pixels";
+import config from "../config";
 
 export class PixelRequest extends BaseRequest {
   calcPixelId(x: number, y: number) {
-    x = x + 1;
-    const xPos = String(x).padStart(3, "0");
-    const yPos = String(y).padStart(3, "0");
-    return +`${yPos}${xPos}`;
+    return x + y * config.canvasSize + 1;
   }
 
   async getPixel(x: number, y: number) {
